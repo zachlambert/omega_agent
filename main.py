@@ -38,7 +38,6 @@ else:
     f = open(agent_json_file, 'w')
     f.write(json_string)
 
-print('Name:{}'.format(agent['name']))
 now = datetime.datetime.now()
 birth = datetime.datetime.strptime(agent['birth_date'], '%Y-%m-%dT%H:%M:%SZ')
 delta = now - birth
