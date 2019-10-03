@@ -3,56 +3,39 @@ import requests
 import json
 import os
 import datetime
+import time
 
-from keyword_detector import KeywordDetector
+from control.chat import introduce_yourself
+from control.keywords import process_keyword
+from control.server import get_agent
+from sound.keyword_detector import KeywordDetector
+from sound.voice import speak
 
-base_url = 'http://zachalambert.pythonanywhere.com/'
-agent_json_file = 'agent.json'
+CONNECTION_MAX_TRIES = 3
 
 agent = None
-if os.path.exists(agent_json_file):
-    f = open(agent_json_file, 'r')
-    agent = json.load(f)
-    id = agent['id']
-    f.close()
+tries = 0
+while agent==None:
+    agent, message = get_agent()
+    speak(message)
+    if agent==None:
+        tries += 1
+        if tries<CONNECTION_MAX_TRIES:
+            speak('Will retry in 5 seconds')
+            time.sleep(5)
+        else:
+            speak('Unable to connect after {} attempts'.format(tries))
+            speak('Exiting program')
+            exit()
 
-    GET_URL = base_url + 'agent/' + str(id)
-    request = requests.get(GET_URL)
-    if request.status_code != 200 and request.status_code != 201:
-        raise Exception('Request returned error')
-    
-    db_agent = request.json()
-    if agent!=db_agent:
-        print('Updating agent file')
-        f = open(agent_json_file, 'w')
-        f.write(json.dumps(db_agent))
-        agent = db_agent 
-    else:
-        print('Local file is up to date')
-else:
-    print('No local agent file, creating new')
 
-    NEW_URL = base_url + 'new'
-    request = requests.post(url=NEW_URL)
-    agent = request.json()
-
-    json_string = json.dumps(agent)
-    f = open(agent_json_file, 'w')
-    f.write(json_string)
-
-now = datetime.datetime.now()
-birth = datetime.datetime.strptime(agent['birth_date'], '%Y-%m-%dT%H:%M:%SZ')
-delta = now - birth
-
-print('Hello, my name is {}. My id number is {} and I am {} seconds old.'.format(agent['name'], agent['id'], delta.seconds))
-print('Starting the listening process')
-
-def keyword_callback(keyword):
-    print("Detected {}".format(keyword))
+introduce_yourself(agent)
+speak('Starting the listening process')
 
 keyword_detector = KeywordDetector(
-    keyword_callback=keyword_callback,
-    keyword_files=['blueberry_raspberrypi.ppn'],
+    keyword_callback=process_keyword,
+    keyword_files=['blueberry_raspberrypi.ppn',
+                   'grapefruit_raspberrypi.ppn'],
     input_device_index=2,
     sensitivity=0.5)
 

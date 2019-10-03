@@ -47,8 +47,8 @@ class KeywordDetector(Thread):
         self._sensitivity = float(sensitivity)
 
         self._output_path = output_path
-        if self._output_path is not None:
-            self._recorded_frames = []
+        
+        self._recorded_frames = []
 
     def run(self):
         num_keywords = len(self._keyword_file_paths)
@@ -56,25 +56,25 @@ class KeywordDetector(Thread):
         keyword_names =\
             [os.path.basename(x).strip('.ppn').strip('_compressed').split('_')[0] for x in self._keyword_file_paths]
 
+        porcupine = None
+        pa = None
+        audio_stream = None
+        sample_rate = None
+
         def _audio_callback(in_data, frame_count, time_info, status):
             if frame_count >= porcupine.frame_length:
                 pcm = struct.unpack_from("h" * porcupine.frame_length, in_data)
                 result = porcupine.process(pcm)
 
+                self._recorded_frames.append(pcm)
+ 
                 if num_keywords == 1 and result:
-                    self._keyword_callback(keyword_names[0])
+                    self._keyword_callback(keyword_names[0], self._recorded_frames, sample_rate)
                 elif num_keywords > 1 and result>=0:
-                    self._keyword_callback(keyword_names[result])
-
-                if self._output_path is not None:
-                    self._recorded_frames.append(pcm)
-            
+                    self._keyword_callback(keyword_names[result], self._recorded_frames, sample_rate)
+           
             return None, pyaudio.paContinue
 
-        porcupine = None
-        pa = None
-        audio_stream = None
-        sample_rate = None
         try:
             porcupine = Porcupine(
                 library_path=self._library_path,
