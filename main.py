@@ -1,8 +1,10 @@
+
 import requests
 import json
 import os
 import datetime
 
+from keyword_detector import KeywordDetector
 
 base_url = 'http://zachalambert.pythonanywhere.com/'
 agent_json_file = 'agent.json'
@@ -43,3 +45,15 @@ birth = datetime.datetime.strptime(agent['birth_date'], '%Y-%m-%dT%H:%M:%SZ')
 delta = now - birth
 
 print('Hello, my name is {}. My id number is {} and I am {} seconds old.'.format(agent['name'], agent['id'], delta.seconds))
+print('Starting the listening process')
+
+def keyword_callback(keyword):
+    print("Detected {}".format(keyword))
+
+keyword_detector = KeywordDetector(
+    keyword_callback=keyword_callback,
+    keyword_files=['blueberry_raspberrypi.ppn'],
+    input_device_index=2,
+    sensitivity=0.5)
+
+keyword_detector.run()
