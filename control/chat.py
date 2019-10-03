@@ -1,7 +1,7 @@
 
 import datetime
 
-from sound.voice import speak
+from sound.output import speak
 
 
 def introduce_yourself(agent):

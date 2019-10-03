@@ -6,12 +6,12 @@ import datetime
 import time
 
 from control.chat import introduce_yourself
-from control.keywords import process_keyword, process_frame
+from control.process import process_keyword, process_phrase
 from control.server import get_agent
-from sound.keyword_detector import KeywordDetector
-from sound.voice import speak
+from sound.input import ListenerConfig, Listener 
+from sound.output import speak
 
-""
+
 CONNECTION_MAX_TRIES = 3
 
 agent = None
@@ -32,13 +32,14 @@ while agent==None:
 
 introduce_yourself(agent)
 speak('Starting the listening process')
-"""
-keyword_detector = KeywordDetector(
-    keyword_callback=process_keyword,
-    keyword_files=['blueberry_raspberrypi.ppn',
-                   'grapefruit_raspberrypi.ppn'],
-    input_device_index=2,
-    sensitivity=0.5,
-    process_frame=process_frame)
 
-keyword_detector.run()
+config = ListenerConfig()
+
+listener = Listener(
+    config=config,
+    keyword_files=['blueberry_raspberrypi.ppn', 'grapefruit_raspberrypi.ppn'],
+    keyword_callback=process_keyword,
+    phrase_keyword='blueberry',
+    phrase_callback=process_phrase)
+
+listener.run()
