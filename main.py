@@ -13,7 +13,7 @@ from sound.output import speak
 
 
 CONNECTION_MAX_TRIES = 3
-
+'''
 agent = None
 tries = 0
 while agent==None:
@@ -32,7 +32,7 @@ while agent==None:
 
 introduce_yourself(agent)
 speak('Starting the listening process')
-
+'''
 config = ListenerConfig()
 
 listener = Listener(

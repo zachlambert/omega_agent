@@ -6,7 +6,7 @@ from sound.output import speak
 
 def introduce_yourself(agent):
     now = datetime.datetime.now()
-    birth = datetime.datetime.strptime(agent['birth_date'], '%Y-%m-%dT%H:%M:%SZ')
+    birth = datetime.datetime.strptime(agent['birth_date'], '%Y-%m-%dT%H:%M:%S.%fZ')
     delta = now - birth
 
     speak('Hello, my name is {}. My id number is {} and I am {} seconds old.'
